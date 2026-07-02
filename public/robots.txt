@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /dashboard
+Disallow: /customers
+Allow: /auth
+Allow: /$

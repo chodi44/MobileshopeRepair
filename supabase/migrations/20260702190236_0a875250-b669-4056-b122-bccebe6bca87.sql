@@ -1,0 +1,1 @@
+ALTER TABLE public.repair_jobs ADD COLUMN received_at timestamptz NOT NULL DEFAULT now();

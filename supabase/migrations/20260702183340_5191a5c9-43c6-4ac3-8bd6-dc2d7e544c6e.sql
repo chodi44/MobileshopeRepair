@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.generate_ticket_code() FROM PUBLIC, anon, authenticated;
