@@ -10,6 +10,7 @@ import { z } from "zod";
 import { ArrowLeft, Camera, User as UserIcon, X, Search, Phone, Check, UserPlus } from "lucide-react";
 import { addCustomerPhoto, getCustomerPhotoUrl } from "@/lib/customer-photo";
 import { SUPPORTED_LANGUAGES, isLanguageCode } from "@/lib/i18n";
+import { WebcamCapture } from "@/components/ui/webcam-capture";
 
 export const Route = createFileRoute("/_authenticated/repairs/new")({
   head: () => ({ meta: [{ title: "New repair — FixCell" }] }),
@@ -77,6 +78,7 @@ function NewRepair() {
   // Photo (attached to customer profile)
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [showWebcam, setShowWebcam] = useState(false);
 
   useEffect(() => {
     supabase
@@ -122,6 +124,11 @@ function NewRepair() {
     }
     setPhotoFile(f);
     setPhotoPreview(URL.createObjectURL(f));
+  }
+  function onWebcamCapture(file: File) {
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
   }
   function clearPhoto() {
     if (photoPreview) URL.revokeObjectURL(photoPreview);
@@ -441,7 +448,7 @@ function NewRepair() {
                       type="button"
                       size="sm"
                       variant="outline"
-                      onClick={() => document.getElementById("repair-photo-camera")?.click()}
+                      onClick={() => setShowWebcam(true)}
                     >
                       <Camera className="h-4 w-4 mr-1" /> Take photo
                     </Button>
@@ -460,20 +467,18 @@ function NewRepair() {
                     )}
                   </div>
                   <input
-                    id="repair-photo-camera"
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    className="hidden"
-                    onChange={onPhotoChange}
-                  />
-                  <input
                     id="repair-photo-file"
                     type="file"
                     accept="image/*"
                     className="hidden"
                     onChange={onPhotoChange}
                   />
+                  {showWebcam && (
+                    <WebcamCapture
+                      onCapture={onWebcamCapture}
+                      onClose={() => setShowWebcam(false)}
+                    />
+                  )}
                   <p className="text-xs text-muted-foreground">Good lighting for a clear photo. Up to 10MB.</p>
                 </div>
               </div>

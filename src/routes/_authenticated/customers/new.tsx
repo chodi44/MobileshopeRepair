@@ -11,6 +11,7 @@ import { ArrowLeft, Camera, User as UserIcon, X } from "lucide-react";
 import { toast } from "sonner";
 import { SUPPORTED_LANGUAGES, isLanguageCode } from "@/lib/i18n";
 import { uploadCustomerPhoto } from "@/lib/customer-photo";
+import { WebcamCapture } from "@/components/ui/webcam-capture";
 
 export const Route = createFileRoute("/_authenticated/customers/new")({
   head: () => ({ meta: [{ title: "New customer — FixCell" }] }),
@@ -35,6 +36,7 @@ function NewCustomerPage() {
   const [existing, setExisting] = useState<Existing | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [showWebcam, setShowWebcam] = useState(false);
 
   function onPhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
@@ -45,6 +47,11 @@ function NewCustomerPage() {
     }
     setPhotoFile(f);
     setPhotoPreview(URL.createObjectURL(f));
+  }
+  function onWebcamCapture(file: File) {
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
   }
   function clearPhoto() {
     if (photoPreview) URL.revokeObjectURL(photoPreview);
@@ -144,7 +151,7 @@ function NewCustomerPage() {
                   type="button"
                   size="sm"
                   variant="outline"
-                  onClick={() => document.getElementById("photo-camera")?.click()}
+                  onClick={() => setShowWebcam(true)}
                 >
                   <Camera className="h-4 w-4 mr-1" /> Take photo
                 </Button>
@@ -163,14 +170,6 @@ function NewCustomerPage() {
                 )}
               </div>
               <input
-                id="photo-camera"
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                onChange={onPhotoChange}
-              />
-              <input
                 id="photo-file"
                 type="file"
                 accept="image/*"
@@ -180,6 +179,12 @@ function NewCustomerPage() {
               <p className="text-xs text-muted-foreground">Use good lighting for a clear ID photo. JPG/PNG, up to 10MB.</p>
             </div>
           </div>
+          {showWebcam && (
+            <WebcamCapture
+              onCapture={onWebcamCapture}
+              onClose={() => setShowWebcam(false)}
+            />
+          )}
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
