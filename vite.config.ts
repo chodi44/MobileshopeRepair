@@ -9,7 +9,7 @@ export default defineConfig({
     tanstackStart({
       server: { 
         entry: "server",
-        preset: process.env.VERCEL ? "vercel" : "node-server"
+        preset: "render"
       },
     }),
     react(),
