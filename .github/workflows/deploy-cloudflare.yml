@@ -1,9 +1,7 @@
 name: Deploy to Cloudflare Pages
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch: # Only run manually — not on every push
 
 jobs:
   deploy:
@@ -24,9 +22,10 @@ jobs:
         run: npm ci
 
       - name: Build project
-        # Set the Nitro preset for Cloudflare if using Vinxi/Nitro under the hood
         env:
           NITRO_PRESET: cloudflare-pages
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         run: npm run build
 
       - name: Publish to Cloudflare Pages
@@ -36,4 +35,3 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: repair-shop-hub
           directory: dist/client
-          # If your build outputs a different directory for Cloudflare, update it above.
