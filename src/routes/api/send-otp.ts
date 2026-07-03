@@ -1,5 +1,5 @@
 import { createAPIFileRoute } from "@tanstack/react-start/api";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { generateAndStoreOtp } from "@/lib/otp-store";
 
 const OWNER_EMAIL = "mobilepointkakinada@gmail.com";
@@ -9,16 +9,10 @@ export const APIRoute = createAPIFileRoute("/api/send-otp")({
     try {
       const otp = generateAndStoreOtp();
 
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.GMAIL_USER,
-          pass: process.env.GMAIL_APP_PASSWORD,
-        },
-      });
+      const resend = new Resend(process.env.RESEND_API_KEY);
 
-      await transporter.sendMail({
-        from: `"FixCell Security" <${process.env.GMAIL_USER}>`,
+      await resend.emails.send({
+        from: "FixCell Security <onboarding@resend.dev>",
         to: OWNER_EMAIL,
         subject: `FixCell Password Change OTP: ${otp}`,
         html: `
