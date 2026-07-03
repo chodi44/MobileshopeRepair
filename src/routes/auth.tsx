@@ -1,13 +1,19 @@
-import { createFileRoute, redirect, useNavigate, useSearch } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
 import { toast } from "sonner";
-import { Wrench, Eye, EyeOff } from "lucide-react";
+import { Wrench, Eye, EyeOff, ShieldAlert } from "lucide-react";
+
+// ─── Only these 3 emails are allowed to log in ───────────────────────────────
+const ALLOWED_EMAILS = [
+  "mobilepointms@kkd.com",
+  "mobilepointms@kkd2.com",
+  "mobilepointms@kkd3.com",
+];
 
 const searchSchema = z.object({
   redirect: z.string().optional(),
@@ -36,15 +42,13 @@ const credentialsSchema = z.object({
   password: z.string().min(8, "Minimum 8 characters").max(72),
 });
 
-
 function AuthPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/auth" });
   const [loading, setLoading] = useState(false);
-  const [resetLoading, setResetLoading] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
+  const [blocked, setBlocked] = useState(false);
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -57,38 +61,28 @@ function AuthPage() {
       toast.error(parsed.error.issues[0].message);
       return;
     }
+
+    // ── Whitelist check ──────────────────────────────────────────────────────
+    if (!ALLOWED_EMAILS.includes(parsed.data.email.toLowerCase())) {
+      setBlocked(true);
+      toast.error("Access denied. This email is not authorized.");
+      return;
+    }
+    setBlocked(false);
+
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword(parsed.data);
     setLoading(false);
     if (error) {
       toast.error(
         error.message === "Invalid login credentials"
-          ? "Email or password is wrong. If this account was just created before, reset the password below."
+          ? "Email or password is wrong."
           : error.message,
       );
       return;
     }
     toast.success("Signed in");
     navigate({ to: search.redirect ?? "/dashboard" });
-  }
-
-
-  async function handlePasswordReset() {
-    const parsed = z.string().trim().email("Enter your email first").safeParse(loginEmail);
-    if (!parsed.success) {
-      toast.error(parsed.error.issues[0].message);
-      return;
-    }
-    setResetLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    setResetLoading(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    toast.success("Password reset link sent");
   }
 
   return (
@@ -105,6 +99,14 @@ function AuthPage() {
           <p className="text-sm text-muted-foreground text-center mb-6">
             Repair shop management console
           </p>
+
+          {blocked && (
+            <div className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 mb-4 text-sm text-destructive">
+              <ShieldAlert className="h-4 w-4 shrink-0" />
+              This email is not authorized to access this system.
+            </div>
+          )}
+
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="login-email">Email</Label>
@@ -115,7 +117,7 @@ function AuthPage() {
                 required
                 autoComplete="email"
                 value={loginEmail}
-                onChange={(event) => setLoginEmail(event.target.value)}
+                onChange={(e) => { setLoginEmail(e.target.value); setBlocked(false); }}
               />
             </div>
             <div className="space-y-2">
@@ -143,19 +145,21 @@ function AuthPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Signing in…" : "Sign in"}
             </Button>
-            <Button
-              type="button"
-              variant="link"
-              className="w-full px-0 text-sm"
-              disabled={resetLoading}
-              onClick={handlePasswordReset}
-            >
-              {resetLoading ? "Sending reset code…" : "Forgot password? (SMS to owner)"}
-            </Button>
           </form>
+          <div className="mt-4 text-center">
+            <Link
+              to="/change-password"
+              className="text-sm text-muted-foreground hover:text-primary underline-offset-4 hover:underline"
+            >
+              Change staff password
+            </Link>
+          </div>
         </div>
         <p className="text-center text-xs text-muted-foreground mt-6">
-          Are you a customer? <a href="/track" className="text-primary hover:underline">Track your repair</a>
+          Are you a customer?{" "}
+          <a href="/track" className="text-primary hover:underline">
+            Track your repair
+          </a>
         </p>
       </div>
     </div>
