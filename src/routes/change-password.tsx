@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +18,8 @@ export const Route = createFileRoute("/change-password")({
   component: ChangePasswordPage,
 });
 
-const OWNER_EMAIL_MASKED = "mobile****@gmail.com";
+const OWNER_EMAIL = "mobilepointkakinada@gmail.com";
+const OWNER_EMAIL_MASKED = "mobilepointkak***@gmail.com";
 
 function ChangePasswordPage() {
   const [step, setStep] = useState<"request" | "verify">("request");
@@ -28,13 +30,18 @@ function ChangePasswordPage() {
   const [sendingOtp, setSendingOtp] = useState(false);
   const [changing, setChanging] = useState(false);
 
+  // Send OTP using Supabase's built-in email OTP — no extra API needed!
   async function sendOtp() {
     setSendingOtp(true);
     try {
-      const res = await fetch("/api/send-otp", { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to send OTP");
-      toast.success(`OTP sent to ${OWNER_EMAIL_MASKED}`);
+      const { error } = await supabase.auth.signInWithOtp({
+        email: OWNER_EMAIL,
+        options: { shouldCreateUser: false },
+      });
+
+      if (error) throw new Error(error.message);
+
+      toast.success(`OTP sent to ${OWNER_EMAIL_MASKED} — check inbox & spam`);
       setStep("verify");
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Failed to send OTP");
@@ -45,7 +52,7 @@ function ChangePasswordPage() {
 
   async function changePasswords(e: React.FormEvent) {
     e.preventDefault();
-    if (!otp.trim()) return toast.error("Enter the OTP");
+    if (!otp.trim()) return toast.error("Enter the OTP from your email");
     if (newPassword.length < 8) return toast.error("Password must be at least 8 characters");
     if (newPassword !== confirmPassword) return toast.error("Passwords do not match");
 
@@ -65,11 +72,12 @@ function ChangePasswordPage() {
       if (data.allUpdated) {
         toast.success("✅ Password changed for all 3 staff accounts!");
       } else {
-        const failed = data.results?.filter((r: { success: boolean }) => !r.success) ?? [];
-        toast.warning(`Password changed for some accounts. ${failed.length} failed — check if all 3 emails are created in Supabase.`);
+        const failed = (data.results ?? []).filter((r: { success: boolean }) => !r.success);
+        toast.warning(
+          `Password changed for some accounts. ${failed.length} not updated — make sure all 3 emails are created in Supabase.`,
+        );
       }
 
-      // Reset form
       setStep("request");
       setOtp("");
       setNewPassword("");
@@ -104,10 +112,13 @@ function ChangePasswordPage() {
           {step === "request" ? (
             <div className="space-y-4">
               <div className="rounded-lg border bg-muted/40 p-4 text-sm space-y-1">
-                <div className="font-medium">An OTP will be sent to:</div>
+                <div className="font-medium">OTP will be sent to owner email:</div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Mail className="h-4 w-4" />
                   {OWNER_EMAIL_MASKED}
+                </div>
+                <div className="text-xs text-muted-foreground pt-1">
+                  Sent via Supabase — check inbox and spam folder
                 </div>
               </div>
               <Button className="w-full" onClick={sendOtp} disabled={sendingOtp}>
@@ -117,19 +128,20 @@ function ChangePasswordPage() {
           ) : (
             <form onSubmit={changePasswords} className="space-y-4">
               <div className="rounded-lg border bg-blue-500/10 border-blue-500/20 p-3 text-sm text-blue-700 dark:text-blue-300">
-                OTP sent to {OWNER_EMAIL_MASKED}. Check inbox (and spam).
+                ✅ OTP sent to {OWNER_EMAIL_MASKED}. Check inbox (and spam folder).
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="otp">Enter OTP</Label>
+                <Label htmlFor="otp">Enter 6-digit OTP</Label>
                 <Input
                   id="otp"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                   maxLength={6}
-                  placeholder="6-digit code"
+                  placeholder="123456"
                   autoComplete="one-time-code"
                   inputMode="numeric"
+                  className="text-center text-xl tracking-widest"
                 />
               </div>
 
@@ -145,6 +157,7 @@ function ChangePasswordPage() {
                     required
                     className="pr-10"
                     autoComplete="new-password"
+                    placeholder="Minimum 8 characters"
                   />
                   <button
                     type="button"
@@ -166,6 +179,7 @@ function ChangePasswordPage() {
                   minLength={8}
                   required
                   autoComplete="new-password"
+                  placeholder="Repeat new password"
                 />
               </div>
 

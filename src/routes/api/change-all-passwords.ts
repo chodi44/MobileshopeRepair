@@ -1,6 +1,7 @@
 import { createAPIFileRoute } from "@tanstack/react-start/api";
 import { createClient } from "@supabase/supabase-js";
-import { verifyOtp } from "@/lib/otp-store";
+
+const OWNER_EMAIL = "mobilepointkakinada@gmail.com";
 
 // All 3 staff email accounts
 const STAFF_EMAILS = [
@@ -28,58 +29,47 @@ export const APIRoute = createAPIFileRoute("/api/change-all-passwords")({
         });
       }
 
-      // Verify OTP
-      if (!verifyOtp(otp)) {
-        return new Response(JSON.stringify({ error: "Invalid or expired OTP" }), {
-          status: 401,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-
-      // Use Supabase Admin client (service role key)
+      // Use Supabase Admin client
       const adminClient = createClient(
         process.env.SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!,
         { auth: { autoRefreshToken: false, persistSession: false } },
       );
 
+      // Verify OTP using Supabase's built-in OTP verification
+      const { error: verifyError } = await adminClient.auth.verifyOtp({
+        email: OWNER_EMAIL,
+        token: otp,
+        type: "email",
+      });
+
+      if (verifyError) {
+        console.error("[change-all-passwords] OTP verify failed:", verifyError.message);
+        return new Response(
+          JSON.stringify({ error: "Invalid or expired OTP. Request a new one." }),
+          { status: 401, headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      // OTP verified — change password for all 3 staff accounts
+      const { data: users } = await adminClient.auth.admin.listUsers();
       const results: { email: string; success: boolean; error?: string }[] = [];
 
       for (const email of STAFF_EMAILS) {
-        // Find user by email
-        const { data: users, error: listError } = await adminClient.auth.admin.listUsers();
-        if (listError) {
-          results.push({ email, success: false, error: listError.message });
-          continue;
-        }
-
-        const user = users.users.find((u) => u.email === email);
+        const user = users?.users.find((u) => u.email === email);
         if (!user) {
-          // User doesn't exist yet — skip silently
           results.push({ email, success: false, error: "User not found in Supabase" });
           continue;
         }
-
         const { error: updateError } = await adminClient.auth.admin.updateUserById(user.id, {
           password: newPassword,
         });
-
-        results.push({
-          email,
-          success: !updateError,
-          error: updateError?.message,
-        });
+        results.push({ email, success: !updateError, error: updateError?.message });
       }
 
-      const allSuccess = results.every((r) => r.success);
       const anySuccess = results.some((r) => r.success);
-
       return new Response(
-        JSON.stringify({
-          success: anySuccess,
-          allUpdated: allSuccess,
-          results,
-        }),
+        JSON.stringify({ success: anySuccess, allUpdated: results.every((r) => r.success), results }),
         { status: 200, headers: { "Content-Type": "application/json" } },
       );
     } catch (err) {
