@@ -301,6 +301,7 @@ function NewRepair() {
               onClear={preselectedCustomer ? undefined : clearSelection}
             />
           ) : (
+            /* ── SEARCH MODE ── */
             <div className="space-y-2">
               <Label htmlFor="customer-search">Customer</Label>
               <div className="relative">
@@ -308,10 +309,7 @@ function NewRepair() {
                 <Input
                   id="customer-search"
                   value={query}
-                  onChange={(e) => {
-                    setQuery(e.target.value);
-                    setShowNewCustomer(false);
-                  }}
+                  onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search by name, phone or email…"
                   className="pl-9"
                   autoComplete="off"
@@ -359,17 +357,12 @@ function NewRepair() {
                 </div>
               )}
               {!query && !showNewCustomer && (
-                <p className="text-xs text-muted-foreground">
-                  Start typing to find an existing customer, or{" "}
-                  <button
-                    type="button"
-                    className="text-primary hover:underline"
-                    onClick={() => { setShowNewCustomer(true); setQuery(""); }}
-                  >
-                    add a new customer
-                  </button>
-                  .
-                </p>
+                <div className="flex flex-col gap-2">
+                  <p className="text-xs text-muted-foreground">No customer typed — or add new:</p>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setShowNewCustomer(true)}>
+                    <UserPlus className="h-4 w-4 mr-1" /> Add new customer
+                  </Button>
+                </div>
               )}
 
               {showNewCustomer && (
