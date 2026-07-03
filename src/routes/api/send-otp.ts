@@ -7,11 +7,14 @@ const OWNER_EMAIL = "mobilepointkakinada@gmail.com";
 export const APIRoute = createAPIFileRoute("/api/send-otp")({
   POST: async () => {
     try {
-      const otp = generateAndStoreOtp();
+      if (!process.env.RESEND_API_KEY) {
+        throw new Error("RESEND_API_KEY environment variable is not set");
+      }
 
+      const otp = generateAndStoreOtp();
       const resend = new Resend(process.env.RESEND_API_KEY);
 
-      await resend.emails.send({
+      const { data, error } = await resend.emails.send({
         from: "MP Repair Security <onboarding@resend.dev>",
         to: OWNER_EMAIL,
         subject: `MP Repair Password Change OTP: ${otp}`,
@@ -28,13 +31,23 @@ export const APIRoute = createAPIFileRoute("/api/send-otp")({
         `,
       });
 
+      if (error) {
+        console.error("[send-otp] Resend API error:", error);
+        return new Response(
+          JSON.stringify({ error: `Email service error: ${error.message}` }),
+          { status: 500, headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      console.log("[send-otp] OTP email sent, id:", data?.id);
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       });
-    } catch (err) {
-      console.error("[send-otp]", err);
-      return new Response(JSON.stringify({ error: "Failed to send OTP email" }), {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      console.error("[send-otp] Exception:", msg);
+      return new Response(JSON.stringify({ error: msg }), {
         status: 500,
         headers: { "Content-Type": "application/json" },
       });
