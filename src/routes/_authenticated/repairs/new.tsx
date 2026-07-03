@@ -177,12 +177,17 @@ function NewRepair() {
       .eq("phone", parsed.data.phone);
 
     if (dups && dups.length > 0) {
-      // Phone exists — spec says duplicates blocked, must reuse existing profile
-      const existing = dups[0] as Customer;
-      toast.message(`Phone already exists — using ${existing.name}'s profile`, {
-        description: "Duplicate phone numbers are not allowed. The existing customer has been selected.",
+      // Phone already used — let staff decide: reuse or create new
+      setDupDialog({
+        existing: dups[0] as Customer,
+        newName: parsed.data.name,
+        newPhone: parsed.data.phone,
+        newEmail: parsed.data.email || "",
+        newAddress: parsed.data.address || "",
+        newLang: parsed.data.preferred_language,
       });
-      return existing;
+      setSaving(false);
+      return null; // wait for dialog choice
     }
 
     return await doInsertCustomer(parsed.data);

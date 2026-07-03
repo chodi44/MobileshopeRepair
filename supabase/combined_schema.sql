@@ -101,11 +101,8 @@ CREATE TABLE IF NOT EXISTS public.customers (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
--- Add unique on phone if not already there
-DO $$ BEGIN
-  ALTER TABLE public.customers ADD CONSTRAINT customers_phone_unique UNIQUE (phone);
-EXCEPTION WHEN duplicate_table THEN NULL;
-         WHEN duplicate_object THEN NULL; END $$;
+-- Allow multiple customers with same phone (family members sharing one number)
+ALTER TABLE public.customers DROP CONSTRAINT IF EXISTS customers_phone_unique;
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.customers TO authenticated;
 GRANT ALL ON public.customers TO service_role;
