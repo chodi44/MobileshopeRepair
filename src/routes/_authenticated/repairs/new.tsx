@@ -208,7 +208,12 @@ function NewRepair() {
       .select("id, name, phone, email, photo_url")
       .single();
     if (error || !inserted) {
-      toast.error(error?.message ?? "Failed to add customer");
+      const msg = error?.message ?? "";
+      if (msg.includes("unique") || msg.includes("duplicate")) {
+        toast.error("Database still blocks duplicate phone numbers — ask admin to run the phone-constraint SQL fix.");
+      } else {
+        toast.error(msg || "Failed to add customer");
+      }
       return null;
     }
     return inserted as Customer;
