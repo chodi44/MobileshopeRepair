@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,17 +29,13 @@ function ChangePasswordPage() {
   const [sendingOtp, setSendingOtp] = useState(false);
   const [changing, setChanging] = useState(false);
 
-  // Send OTP using Supabase's built-in email OTP — no extra API needed!
+  // Send OTP using Gmail via server API
   async function sendOtp() {
     setSendingOtp(true);
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: OWNER_EMAIL,
-        options: { shouldCreateUser: false },
-      });
-
-      if (error) throw new Error(error.message);
-
+      const res = await fetch("/api/send-otp", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to send OTP");
       toast.success(`OTP sent to ${OWNER_EMAIL_MASKED} — check inbox & spam`);
       setStep("verify");
     } catch (err: unknown) {
