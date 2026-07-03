@@ -18,7 +18,7 @@ type Customer = {
 };
 
 export const Route = createFileRoute("/_authenticated/customers/")({
-  head: () => ({ meta: [{ title: "Customers — FixCell" }] }),
+  head: () => ({ meta: [{ title: "Customers — MP Repair" }] }),
   component: CustomersPage,
 });
 

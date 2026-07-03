@@ -1,6 +1,6 @@
 {
-  "name": "FixCell — Repair Shop",
-  "short_name": "FixCell",
+  "name": "MP Repair — Repair Shop",
+  "short_name": "MP Repair",
   "description": "Manage customers, repair jobs and billing for your mobile repair shop.",
   "start_url": "/",
   "display": "standalone",

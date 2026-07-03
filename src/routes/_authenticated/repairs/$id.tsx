@@ -17,7 +17,7 @@ import { addCustomerPhoto, getCustomerPhotoUrl } from "@/lib/customer-photo";
 import { parseTicketCode } from "@/lib/ticket";
 
 export const Route = createFileRoute("/_authenticated/repairs/$id")({
-  head: () => ({ meta: [{ title: "Repair — FixCell" }] }),
+  head: () => ({ meta: [{ title: "Repair — MP Repair" }] }),
   component: RepairDetail,
 });
 

@@ -94,7 +94,7 @@ function AuthenticatedLayout() {
   }
 
   const activeLabel =
-    nav.find((n) => pathname === n.to || pathname.startsWith(n.to + "/"))?.label ?? "FixCell";
+    nav.find((n) => pathname === n.to || pathname.startsWith(n.to + "/"))?.label ?? "MP Repair";
   const activeIndex = nav.findIndex(
     (n) => pathname === n.to || pathname.startsWith(n.to + "/"),
   );
@@ -113,7 +113,7 @@ function AuthenticatedLayout() {
             <Wrench className="h-4 w-4 text-sidebar-primary-foreground" />
           </div>
           <div className="flex flex-col leading-none">
-            <span className="display text-lg text-sidebar-accent-foreground">FixCell</span>
+            <span className="display text-lg text-sidebar-accent-foreground">MP Repair</span>
             <span className="eyebrow mt-0.5">Command Center</span>
           </div>
         </div>
@@ -213,7 +213,7 @@ function AuthenticatedLayout() {
             <h1 className="display text-2xl md:text-3xl truncate text-ink">{activeLabel}</h1>
           </div>
           <div className="ml-auto hidden md:flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="kbd">FixCell</span>
+            <span className="kbd">MP Repair</span>
             <span className="num">v1.0</span>
           </div>
         </header>

@@ -11,7 +11,7 @@ import { STATUS_LABEL, statusBadgeClass, type RepairStatus } from "@/lib/repair-
 import { parseTicketCode } from "@/lib/ticket";
 
 export const Route = createFileRoute("/_authenticated/customers/$id")({
-  head: () => ({ meta: [{ title: "Customer — FixCell" }] }),
+  head: () => ({ meta: [{ title: "Customer — MP Repair" }] }),
   component: CustomerProfilePage,
 });
 

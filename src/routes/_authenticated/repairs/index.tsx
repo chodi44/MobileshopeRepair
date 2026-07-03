@@ -20,7 +20,7 @@ type Job = {
 };
 
 export const Route = createFileRoute("/_authenticated/repairs/")({
-  head: () => ({ meta: [{ title: "Repairs — FixCell" }] }),
+  head: () => ({ meta: [{ title: "Repairs — MP Repair" }] }),
   component: RepairsList,
 });
 

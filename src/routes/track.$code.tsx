@@ -17,7 +17,7 @@ export const Route = createFileRoute("/track/$code")({
   ssr: false,
   head: ({ params }) => ({
     meta: [
-      { title: `Repair ${params.code} — FixCell` },
+      { title: `Repair ${params.code} — MP Repair` },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -42,7 +42,7 @@ type PublicNote = {
 };
 
 const TIMELINE: RepairStatus[] = ["received", "diagnosing", "repairing", "ready", "delivered"];
-const STORAGE_KEY = "fixcell.trackLang";
+const STORAGE_KEY = "MP Repair.trackLang";
 
 function TrackDetail() {
   const { code } = Route.useParams();

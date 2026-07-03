@@ -12,12 +12,12 @@ export const APIRoute = createAPIFileRoute("/api/send-otp")({
       const resend = new Resend(process.env.RESEND_API_KEY);
 
       await resend.emails.send({
-        from: "FixCell Security <onboarding@resend.dev>",
+        from: "MP Repair Security <onboarding@resend.dev>",
         to: OWNER_EMAIL,
-        subject: `FixCell Password Change OTP: ${otp}`,
+        subject: `MP Repair Password Change OTP: ${otp}`,
         html: `
           <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px;">
-            <h2 style="color: #0f172a; margin-bottom: 8px;">🔐 FixCell Password Change</h2>
+            <h2 style="color: #0f172a; margin-bottom: 8px;">🔐 MP Repair Password Change</h2>
             <p style="color: #64748b; font-size: 14px;">Someone requested a password change for all staff accounts.</p>
             <div style="background: #f1f5f9; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
               <div style="font-size: 36px; font-weight: bold; letter-spacing: 8px; color: #3b82f6;">${otp}</div>

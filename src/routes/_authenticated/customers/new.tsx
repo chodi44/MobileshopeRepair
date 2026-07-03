@@ -14,7 +14,7 @@ import { uploadCustomerPhoto } from "@/lib/customer-photo";
 import { WebcamCapture } from "@/components/ui/webcam-capture";
 
 export const Route = createFileRoute("/_authenticated/customers/new")({
-  head: () => ({ meta: [{ title: "New customer — FixCell" }] }),
+  head: () => ({ meta: [{ title: "New customer — MP Repair" }] }),
   component: NewCustomerPage,
 });
 

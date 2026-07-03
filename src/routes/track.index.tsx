@@ -11,16 +11,16 @@ export const Route = createFileRoute("/track/")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Track your repair — FixCell" },
+      { title: "Track your repair — MP Repair" },
       { name: "description", content: "Enter your repair ticket code to see the latest status of your device." },
-      { property: "og:title", content: "Track your repair — FixCell" },
+      { property: "og:title", content: "Track your repair — MP Repair" },
       { property: "og:description", content: "Enter your repair ticket code to see the latest status." },
     ],
   }),
   component: TrackHome,
 });
 
-const STORAGE_KEY = "fixcell.trackLang";
+const STORAGE_KEY = "MP Repair.trackLang";
 
 function TrackHome() {
   const navigate = useNavigate();

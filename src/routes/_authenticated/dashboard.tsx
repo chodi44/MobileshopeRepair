@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Users, Wrench, Package, Receipt, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — FixCell" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — MP Repair" }] }),
   component: DashboardPage,
 });
 

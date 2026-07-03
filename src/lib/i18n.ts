@@ -91,7 +91,7 @@ type UIKey =
 
 export const UI: Record<LanguageCode, Record<UIKey, string>> = {
   en: {
-    brand: "FixCell",
+    brand: "MP Repair",
     trackTitle: "Track your repair",
     trackSubtitle: "Enter the ticket code we gave you when you dropped off your device.",
     ticketCode: "Ticket code",
@@ -110,7 +110,7 @@ export const UI: Record<LanguageCode, Record<UIKey, string>> = {
     adminLogin: "Admin Login",
   },
   ar: {
-    brand: "FixCell",
+    brand: "MP Repair",
     trackTitle: "تتبع الإصلاح",
     trackSubtitle: "أدخل رمز التذكرة الذي تلقيته عند تسليم جهازك.",
     ticketCode: "رمز التذكرة",
@@ -129,7 +129,7 @@ export const UI: Record<LanguageCode, Record<UIKey, string>> = {
     adminLogin: "تسجيل دخول المسؤول",
   },
   hi: {
-    brand: "FixCell",
+    brand: "MP Repair",
     trackTitle: "अपनी मरम्मत ट्रैक करें",
     trackSubtitle: "जब आपने डिवाइस दिया था तब मिला टिकट कोड डालें।",
     ticketCode: "टिकट कोड",
@@ -148,7 +148,7 @@ export const UI: Record<LanguageCode, Record<UIKey, string>> = {
     adminLogin: "व्यवस्थापक लॉगिन",
   },
   es: {
-    brand: "FixCell",
+    brand: "MP Repair",
     trackTitle: "Sigue tu reparación",
     trackSubtitle: "Ingresa el código del ticket que te dimos al entregar tu dispositivo.",
     ticketCode: "Código del ticket",
@@ -167,7 +167,7 @@ export const UI: Record<LanguageCode, Record<UIKey, string>> = {
     adminLogin: "Acceso de administrador",
   },
   te: {
-    brand: "FixCell",
+    brand: "MP Repair",
     trackTitle: "మీ మరమ్మతును ట్రాక్ చేయండి",
     trackSubtitle: "మీరు పరికరాన్ని అప్పగించినప్పుడు ఇచ్చిన టికెట్ కోడ్‌ను నమోదు చేయండి.",
     ticketCode: "టికెట్ కోడ్",

@@ -41,7 +41,7 @@ type CustomerGroup = {
 };
 
 export const Route = createFileRoute("/_authenticated/history")({
-  head: () => ({ meta: [{ title: "History — FixCell" }] }),
+  head: () => ({ meta: [{ title: "History — MP Repair" }] }),
   component: HistoryPage,
 });
 

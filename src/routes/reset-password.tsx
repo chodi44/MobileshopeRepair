@@ -12,7 +12,7 @@ export const Route = createFileRoute("/reset-password")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Reset password — FixCell" },
+      { title: "Reset password — MP Repair" },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -63,7 +63,7 @@ function ResetPasswordPage() {
           <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
             <Wrench className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-2xl font-semibold tracking-tight">FixCell</span>
+          <span className="text-2xl font-semibold tracking-tight">MP Repair</span>
         </div>
         <div className="bg-card border rounded-xl p-6 shadow-[var(--shadow-card)]">
           <h1 className="text-xl font-semibold text-center mb-1">Set new password</h1>

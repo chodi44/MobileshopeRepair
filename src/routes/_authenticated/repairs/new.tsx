@@ -13,7 +13,7 @@ import { SUPPORTED_LANGUAGES, isLanguageCode } from "@/lib/i18n";
 import { WebcamCapture } from "@/components/ui/webcam-capture";
 
 export const Route = createFileRoute("/_authenticated/repairs/new")({
-  head: () => ({ meta: [{ title: "New repair — FixCell" }] }),
+  head: () => ({ meta: [{ title: "New repair — MP Repair" }] }),
   validateSearch: (s: Record<string, unknown>) => ({
     customer: typeof s.customer === "string" ? s.customer : undefined,
   }),

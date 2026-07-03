@@ -82,14 +82,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
-      { name: "apple-mobile-web-app-title", content: "FixCell" },
-      { title: "FixCell — Mobile Repair Shop Management" },
+      { name: "apple-mobile-web-app-title", content: "MP Repair" },
+      { title: "MP Repair — Mobile Repair Shop Management" },
       {
         name: "description",
         content:
           "Manage customers, repair jobs, inventory, and billing for your mobile phone repair shop.",
       },
-      { property: "og:title", content: "FixCell — Mobile Repair Shop Management" },
+      { property: "og:title", content: "MP Repair — Mobile Repair Shop Management" },
       {
         property: "og:description",
         content:
