@@ -351,20 +351,20 @@ function NewRepair() {
                       size="sm"
                       variant="outline"
                       className="w-full"
-                      onClick={() => setShowNewCustomer(true)}
+                      onClick={() => { setShowNewCustomer(true); setQuery(""); }}
                     >
                       <UserPlus className="h-4 w-4 mr-1" /> Add new customer
                     </Button>
                   </div>
                 </div>
               )}
-              {!query && (
+              {!query && !showNewCustomer && (
                 <p className="text-xs text-muted-foreground">
                   Start typing to find an existing customer, or{" "}
                   <button
                     type="button"
                     className="text-primary hover:underline"
-                    onClick={() => setShowNewCustomer(true)}
+                    onClick={() => { setShowNewCustomer(true); setQuery(""); }}
                   >
                     add a new customer
                   </button>
@@ -374,20 +374,29 @@ function NewRepair() {
 
               {showNewCustomer && (
                 <div className="rounded-lg border p-4 bg-muted/30 space-y-3">
-                  <div className="text-sm font-medium">New customer</div>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-medium">New customer</div>
+                    <button
+                      type="button"
+                      onClick={() => { setShowNewCustomer(false); setQuery(""); }}
+                      className="text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      ✕ Cancel
+                    </button>
+                  </div>
                   <div className="grid sm:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label htmlFor="nc_name">Name *</Label>
                       <Input id="nc_name" name="nc_name" required maxLength={120} />
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="nc_phone">Phone *</Label>
+                      <Label htmlFor="nc_phone">Phone * (with country code)</Label>
                       <Input
                         id="nc_phone"
                         name="nc_phone"
                         type="tel"
                         required
-                        placeholder="+14155551234"
+                        placeholder="+918184844888"
                         maxLength={20}
                       />
                     </div>
@@ -415,8 +424,8 @@ function NewRepair() {
                       <Textarea id="nc_address" name="nc_address" maxLength={500} rows={2} />
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Customer details are locked once saved.
+                  <p className="text-xs text-amber-600 dark:text-amber-400">
+                    ⚠️ Customer details are locked after saving — double-check name &amp; phone.
                   </p>
                 </div>
               )}
