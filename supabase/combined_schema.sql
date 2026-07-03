@@ -4,7 +4,9 @@
 -- ============================================================
 
 -- Roles enum
-CREATE TYPE IF NOT EXISTS public.app_role AS ENUM ('admin', 'staff', 'technician');
+DO $$ BEGIN
+  CREATE TYPE public.app_role AS ENUM ('admin', 'staff', 'technician');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- Profiles
 CREATE TABLE IF NOT EXISTS public.profiles (
