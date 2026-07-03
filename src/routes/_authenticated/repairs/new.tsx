@@ -27,6 +27,14 @@ const BRANDS = [
 
 const E164 = /^\+[1-9]\d{6,14}$/;
 
+/** Normalise phone: if 10 digits, prepend +91; if already E164, use as-is */
+function normalisePhone(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length === 10) return `+91${digits}`;
+  const withPlus = raw.trim().startsWith("+") ? raw.trim() : `+${raw.trim()}`;
+  return withPlus;
+}
+
 const repairSchema = z.object({
   device_brand: z.string().trim().min(1, "Brand required").max(60),
   device_model: z.string().trim().min(1, "Model required").max(80),
@@ -40,8 +48,8 @@ const repairSchema = z.object({
 
 const newCustomerSchema = z.object({
   name: z.string().trim().min(1, "Name required").max(120),
-  phone: z.string().trim().regex(E164, "Phone must be in international format, e.g. +14155551234"),
-  email: z.string().trim().email().max(255).optional().or(z.literal("")),
+  phone: z.string().transform(normalisePhone).pipe(z.string().regex(E164, "Enter 10-digit number (e.g. 8184844888) or full international format (+918184844888)")),
+  email: z.string().trim().email("Invalid email").max(255).optional().or(z.literal("")),
   address: z.string().trim().max(500).optional(),
   preferred_language: z.string().refine(isLanguageCode, "Invalid language"),
 });
@@ -79,6 +87,8 @@ function NewRepair() {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [showWebcam, setShowWebcam] = useState(false);
+  // When same phone found: prompt user to pick existing or create new
+  const [dupDialog, setDupDialog] = useState<{ existing: Customer; newName: string; newPhone: string; newEmail: string; newAddress: string; newLang: string } | null>(null);
 
   useEffect(() => {
     supabase
@@ -147,38 +157,47 @@ function NewRepair() {
   }
 
   async function createNewCustomer(fd: FormData): Promise<Customer | null> {
-    const parsed = newCustomerSchema.safeParse({
+    const raw = {
       name: fd.get("nc_name"),
       phone: fd.get("nc_phone"),
       email: fd.get("nc_email") || "",
       address: fd.get("nc_address") || "",
       preferred_language: fd.get("nc_language") || "en",
-    });
+    };
+    const parsed = newCustomerSchema.safeParse(raw);
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return null;
     }
-    // Duplicate phone check
-    const { data: dup } = await supabase
+
+    // Check if phone already used by another customer
+    const { data: dups } = await supabase
       .from("customers")
       .select("id, name, phone, email, photo_url")
-      .eq("phone", parsed.data.phone)
-      .maybeSingle();
-    if (dup) {
-      toast.message("Phone already exists — using existing profile", {
-        description: (dup as Customer).name,
+      .eq("phone", parsed.data.phone);
+
+    if (dups && dups.length > 0) {
+      // Phone exists — spec says duplicates blocked, must reuse existing profile
+      const existing = dups[0] as Customer;
+      toast.message(`Phone already exists — using ${existing.name}'s profile`, {
+        description: "Duplicate phone numbers are not allowed. The existing customer has been selected.",
       });
-      return dup as Customer;
+      return existing;
     }
+
+    return await doInsertCustomer(parsed.data);
+  }
+
+  async function doInsertCustomer(data: { name: string; phone: string; email?: string; address?: string; preferred_language: string }): Promise<Customer | null> {
     const { data: u } = await supabase.auth.getUser();
     const { data: inserted, error } = await supabase
       .from("customers")
       .insert({
-        name: parsed.data.name,
-        phone: parsed.data.phone,
-        email: parsed.data.email || null,
-        address: parsed.data.address || null,
-        preferred_language: parsed.data.preferred_language,
+        name: data.name,
+        phone: data.phone,
+        email: data.email || null,
+        address: data.address || null,
+        preferred_language: data.preferred_language,
         created_by: u.user?.id,
       })
       .select("id, name, phone, email, photo_url")
@@ -189,6 +208,7 @@ function NewRepair() {
     }
     return inserted as Customer;
   }
+
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -383,19 +403,21 @@ function NewRepair() {
                       <Input id="nc_name" name="nc_name" required maxLength={120} />
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="nc_phone">Phone * (with country code)</Label>
+                      <Label htmlFor="nc_phone">Phone *</Label>
                       <Input
                         id="nc_phone"
                         name="nc_phone"
                         type="tel"
                         required
-                        placeholder="+918184844888"
+                        defaultValue="+91"
+                        placeholder="8184844888"
                         maxLength={20}
                       />
+                      <p className="text-[10px] text-muted-foreground">Type 10 digits (e.g. 8184844888) — +91 added automatically</p>
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="nc_email">Email</Label>
-                      <Input id="nc_email" name="nc_email" type="email" maxLength={255} />
+                      <Label htmlFor="nc_email">Email <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                      <Input id="nc_email" name="nc_email" type="email" maxLength={255} placeholder="customer@email.com" />
                     </div>
                     <div className="space-y-1">
                       <Label htmlFor="nc_language">Preferred language</Label>
@@ -422,6 +444,43 @@ function NewRepair() {
                   </p>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* DUPLICATE PHONE DIALOG */}
+          {dupDialog && (
+            <div className="rounded-lg border-2 border-amber-400/50 bg-amber-50 dark:bg-amber-950/30 p-4 space-y-3">
+              <div className="text-sm font-semibold text-amber-800 dark:text-amber-300">📞 This phone number already exists</div>
+              <div className="rounded-md border bg-card p-3 text-sm">
+                <div className="font-medium">{dupDialog.existing.name}</div>
+                <div className="text-muted-foreground text-xs">{dupDialog.existing.phone}</div>
+                {dupDialog.existing.email && <div className="text-muted-foreground text-xs">{dupDialog.existing.email}</div>}
+              </div>
+              <p className="text-xs text-amber-700 dark:text-amber-400">Is this the same person, or a different customer sharing this number?</p>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => { pickCustomer(dupDialog.existing); setDupDialog(null); setShowNewCustomer(false); }}
+                >
+                  ✅ Use existing — {dupDialog.existing.name}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="flex-1"
+                  onClick={async () => {
+                    const c = await doInsertCustomer({ name: dupDialog.newName, phone: dupDialog.newPhone, email: dupDialog.newEmail, address: dupDialog.newAddress, preferred_language: dupDialog.newLang });
+                    setDupDialog(null);
+                    if (c) { setSelected(c); setShowNewCustomer(false); }
+                  }}
+                >
+                  ➕ Create new — {dupDialog.newName}
+                </Button>
+              </div>
+              <button type="button" onClick={() => setDupDialog(null)} className="text-xs text-muted-foreground hover:underline">← Go back</button>
             </div>
           )}
 

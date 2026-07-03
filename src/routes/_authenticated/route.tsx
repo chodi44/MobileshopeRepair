@@ -45,13 +45,13 @@ type NavItem = {
   disabled?: boolean;
 };
 const nav: NavItem[] = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/repairs", label: "Repairs", icon: Wrench },
-  { to: "/history", label: "History", icon: History },
-  { to: "/customers", label: "Customers", icon: Users },
-  { to: "/devices", label: "Devices", icon: Smartphone, disabled: true },
-  { to: "/inventory", label: "Inventory", icon: Package, disabled: true },
-  { to: "/billing", label: "Billing", icon: Receipt, disabled: true },
+  { to: "/dashboard",  label: "Dashboard",  icon: LayoutDashboard },
+  { to: "/repairs",    label: "Repairs",    icon: Wrench },
+  { to: "/customers",  label: "Customers",  icon: Users },
+  { to: "/history",    label: "History",    icon: History },
+  { to: "/devices",    label: "Devices",    icon: Smartphone, disabled: true },
+  { to: "/inventory",  label: "Inventory",  icon: Package, disabled: true },
+  { to: "/billing",    label: "Billing",    icon: Receipt, disabled: true },
 ];
 
 
